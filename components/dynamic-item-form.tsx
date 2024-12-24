@@ -1,5 +1,5 @@
 "use client";
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { Dispatch, SetStateAction, useState, useRef } from "react";
 import axios from "axios";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -10,12 +10,14 @@ import {
   CardContent,
   CardFooter,
 } from "./ui/card";
+import { Plus } from "lucide-react";
 import { Recipe } from "@/app/page";
 
 const server_url = process.env.SERVER_URL || "http://localhost:8080";
 
 function formatRecipeContent(content: string): Recipe[] {
   try {
+    // left console log here for debbuging as the next prompt might not have same issue
     console.log({ content });
 
     // Sanitize the content: Remove ```json and ```
@@ -62,7 +64,7 @@ const DynamicItemForm: React.FC<DynamicItemFormProps> = ({
   setIsLoading,
 }) => {
   const [items, setItems] = useState<string[]>([""]);
-  const [submittedItems, setSubmittedItems] = useState<string[]>([]);
+  const inputRefs = useRef<HTMLInputElement[]>([]);
 
   const handleItemChange = (index: number, value: string) => {
     const newItems = [...items];
@@ -71,13 +73,24 @@ const DynamicItemForm: React.FC<DynamicItemFormProps> = ({
   };
 
   const handleAddItem = () => {
-    setItems([...items, ""]);
+    setItems((prevItems) => [...prevItems, ""]);
+    setTimeout(() => {
+      inputRefs.current[items.length]?.focus();
+    }, 0);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent, index: number) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (items[index].trim() !== "") {
+        handleAddItem();
+      }
+    }
   };
 
   const handleSubmit = async () => {
     setIsLoading(true);
     const filteredItems = items.filter((item) => item.trim() !== "");
-    setSubmittedItems(filteredItems);
 
     try {
       const response = await axios.post(`${server_url}/recipes`, {
@@ -104,25 +117,24 @@ const DynamicItemForm: React.FC<DynamicItemFormProps> = ({
             <Input
               key={index}
               value={item}
-              placeholder={`Item ${index + 1}`}
+              placeholder="New ingredient"
               onChange={(e) => handleItemChange(index, e.target.value)}
+              onKeyDown={(e) => handleKeyPress(e, index)}
               className="w-full"
+              ref={(el) => {
+                if (el) inputRefs.current[index] = el;
+              }}
             />
           ))}
-          <Button type="button" variant="outline" onClick={handleAddItem}>
-            Add Another Item
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleAddItem}
+            className="flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" /> New
           </Button>
         </div>
-        {submittedItems.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-lg font-bold">Submitted Items:</h3>
-            <ul className="list-disc list-inside">
-              {submittedItems.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        )}
       </CardContent>
       <CardFooter>
         <Button className="w-full" onClick={handleSubmit}>
