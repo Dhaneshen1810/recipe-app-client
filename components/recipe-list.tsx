@@ -4,19 +4,18 @@ import { ArrowRight } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 import NutritionDisclaimer from "./nutrition-disclaimer";
 import Navbar from "./nav-bar";
-import { useRouter } from "next/navigation";
 
 interface RecipeListProps {
   recipes: Recipe[];
   setSelectedRecipe: Dispatch<SetStateAction<Recipe | null>>;
+  setRecipes: Dispatch<SetStateAction<Recipe[]>>;
 }
 
 const RecipeList: React.FC<RecipeListProps> = ({
   recipes,
+  setRecipes,
   setSelectedRecipe,
 }) => {
-  const router = useRouter();
-
   if (recipes.length <= 0) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -33,7 +32,7 @@ const RecipeList: React.FC<RecipeListProps> = ({
 
   const handleClick = (recipe: Recipe) => setSelectedRecipe(recipe);
 
-  const handleBack = () => router.refresh();
+  const handleBack = () => setRecipes([]);
 
   return (
     <>

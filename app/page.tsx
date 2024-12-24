@@ -47,7 +47,11 @@ export default function Home() {
 
   if (recipes.length > 0) {
     return (
-      <RecipeList recipes={recipes} setSelectedRecipe={setSelectedRecipe} />
+      <RecipeList
+        recipes={recipes}
+        setRecipes={setRecipes}
+        setSelectedRecipe={setSelectedRecipe}
+      />
     );
   }
 
