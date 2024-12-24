@@ -13,8 +13,6 @@ import {
 import { Plus } from "lucide-react";
 import { Recipe } from "@/app/page";
 
-const server_url = process.env.SERVER_URL || "http://localhost:8080";
-
 function formatRecipeContent(content: string): Recipe[] {
   try {
     // left console log here for debbuging as the next prompt might not have same issue
@@ -93,11 +91,11 @@ const DynamicItemForm: React.FC<DynamicItemFormProps> = ({
     const filteredItems = items.filter((item) => item.trim() !== "");
 
     try {
-      const response = await axios.post(`${server_url}/recipes`, {
+      const response = await axios.post("/api/recipes", {
         items: filteredItems,
       });
 
-      const messageContent = response.data.choices[0].message.content;
+      const messageContent = response.data.choices?.[0]?.message?.content;
       setRecipes(formatRecipeContent(messageContent));
     } catch (error) {
       console.error("Error submitting items:", error);
